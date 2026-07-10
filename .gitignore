@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# Regenerable large outputs (figures/PDFs are produced by the scripts)
+out/*.png
+out/*.pdf
