@@ -1,6 +1,6 @@
 # Tidal recruitment biases the EIT collapse–overdistention PEEP away from the true optimum
 
-Simulation code, generated data, and the manuscript for the mathematical modeling study:
+Simulation code and generated data for the mathematical modeling study:
 
 > **Tidal recruitment biases the electrical-impedance-tomography collapse–overdistention PEEP: a mathematical modeling study.**
 > Tatsutoshi Shimatani, Muneyuki Takeuchi. Department of Critical Care Medicine, National Cerebral and Cardiovascular Center, Suita, Osaka, Japan.
@@ -32,10 +32,6 @@ scripts/
   make_figures_en.py            Manuscript Figures 1–3
   make_sensitivity_en.py        Manuscript Figure 4
   make_dp_crossings_en.py       Additional file 1 (Figure S1): per-DP collapse–overdistention crossings
-  build_manuscript_docx.py      Markdown → .docx manuscript converter
-manuscript/
-  TR_ODCL_manuscript.md         Manuscript source (Markdown)
-  TR_ODCL_manuscript.docx       Manuscript (Word, built from the Markdown)
 out/
   sweeps_tr.json, deviation_tr.csv          Pre-computed TR-sweep results
   sensitivity_tr.json, sensitivity_tr.csv   Pre-computed sensitivity results
@@ -50,7 +46,7 @@ re-running the simulations.
 ## Requirements
 
 - Python 3.13
-- Packages pinned in `requirements.txt` (numpy, scipy, matplotlib, reportlab, pillow, python-docx)
+- Packages pinned in `requirements.txt` (numpy, scipy, matplotlib, pillow)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate   # optional
@@ -79,13 +75,6 @@ PYTHONPATH=. python make_figures_en.py        # Figures 1–3
 PYTHONPATH=. python make_sensitivity_en.py    # Figure 4
 PYTHONPATH=. python make_dp_crossings_en.py   # Additional file 1 (Figure S1)
 ```
-
-**3. (Optional) Rebuild the manuscript .docx from the Markdown source**:
-
-```bash
-python scripts/build_manuscript_docx.py       # -> manuscript/TR_ODCL_manuscript.docx
-```
-
 ## Model summary
 
 - **Geometry**: 30 compartments × 1000 subunits; a superimposed-pressure (SP) gradient sets each subunit's local transmural pressure `Paw − SP`.
