@@ -86,11 +86,11 @@ def sweep_frac(fracs):
         cst, tru, pk = [], [], []
         for seed in range(N_SEEDS):
             lung = make_frac_tr(seed, f)
-            rows, oc, ot = M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID)
+            rows, oc, ot = M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID, collapse_mode="exp")
             if oc and ot:
                 cst.append(oc); tru.append(ot)
                 pk.append(max(r["cyclic_reopen"] for r in rows))
-        cst = np.array(cst); tru = np.array(tru); dev = cst - tru; pk = np.array(pk)
+        cst = np.array(cst); tru = np.array(tru); dev = tru - cst; pk = np.array(pk)
         out.append(dict(f_tr=float(f), n=int(len(cst)),
                         costa=float(cst.mean()), costa_sd=float(cst.std()),
                         true=float(tru.mean()), true_sd=float(tru.std()),
@@ -107,11 +107,11 @@ def sweep_gap(vals, close_fix):
         cst, tru, pk = [], [], []
         for seed in range(N_SEEDS):
             lung = M.make_lung(seed=seed, **cfg_tr(v))
-            rows, oc, ot = M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID)
+            rows, oc, ot = M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID, collapse_mode="exp")
             if oc and ot:
                 cst.append(oc); tru.append(ot)
                 pk.append(max(r["cyclic_reopen"] for r in rows))
-        cst = np.array(cst); tru = np.array(tru); dev = cst - tru; pk = np.array(pk)
+        cst = np.array(cst); tru = np.array(tru); dev = tru - cst; pk = np.array(pk)
         out.append(dict(val=float(v), gap=float(v - close_fix), n=int(len(cst)),
                         costa=float(cst.mean()), costa_sd=float(cst.std()),
                         true=float(tru.mean()), true_sd=float(tru.std()),

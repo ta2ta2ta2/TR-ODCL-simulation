@@ -35,6 +35,7 @@ for p in ["/System/Library/Fonts/Supplemental/Arial.ttf",
     if os.path.exists(p):
         fm.fontManager.addfont(p); plt.rcParams["font.family"] = fm.FontProperties(fname=p).get_name(); break
 plt.rcParams["axes.unicode_minus"] = False
+plt.rcParams["mathtext.default"] = "regular"   # subscripts use the sans font (Arial)
 plt.rcParams["figure.dpi"] = 120
 plt.rcParams["savefig.dpi"] = 300
 plt.rcParams["savefig.bbox"] = "tight"
@@ -45,7 +46,7 @@ plt.rcParams["ps.fonttype"] = 42
 DP = 14.0
 PEEP_GRID = np.arange(24, 1, -1)
 OD_THR = core.MOJOLI_OD_THR
-GE = "\u2265"; CMH = "cmH2O"   # DejaVu/Arial both carry U+2265
+GE = "\u2265"; CMH = r"cmH$_2$O"   # subscript-2 via mathtext (Arial has no U+2082)
 # TR-unit params (must match run_sweeps_tr.py)
 TOP_TR = 8.0; TCP_TR = 2.0; TR_SD = 1.0
 TCP_FIX = 2.0
@@ -80,14 +81,14 @@ def _pack(rows, oc, ot):
 
 def rep(f_tr, seed=0):
     lung = make_frac_tr(seed, f_tr)
-    return _pack(*M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID))
+    return _pack(*M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID, collapse_mode="exp"))
 
 
 def rep_gap(top, seed=0):
     lung = M.make_lung(seed=seed, aop_mean=M.DISABLED_OPEN, aop_sd=0.0,
                        acp_mean=M.DISABLED_CLOSE, acp_sd=0.0,
                        top_mean=top, top_sd=1.0, tcp_mean=TCP_FIX, tcp_sd=1.0)
-    return _pack(*M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID))
+    return _pack(*M.decremental_trial(lung, dp=DP, peep_grid=PEEP_GRID, collapse_mode="exp"))
 
 
 # ============================================================ Fig1: concept
@@ -106,9 +107,9 @@ def fig_concept():
     ax.text(tcp+0.3, 0.97, "TCP", color=C_DEAD, fontsize=9.5, va="top")
     ax.plot([tcp, top], [v_tcp, v_top], "o", color="#444", ms=6, zorder=6)
     ax.plot([tcp, top], [v_tcp, v_top], color="#1a7f37", lw=2.4, ls="--",
-            label="Open-unit chord (TCP->TOP)")
+            label="Open unit")
     ax.plot([tcp, top], [0.0, v_top], color=C_TR, lw=3.0,
-            label="TR-unit apparent chord (V=0->TOP)")
+            label="TR unit")
     ax.plot([tcp], [0.0], "v", color=C_TR, ms=8, zorder=6)
     ax.fill_between([tcp, top], [0.0, v_top], [v_tcp, v_top],
                     color=C_TR, alpha=0.16, zorder=1)
@@ -148,7 +149,7 @@ def fig_core(gap):
     ax2.margins(x=0.08)
     ax2.axhline(0, color="k", lw=0.9, ls=":")
     ax2.set_xlabel("Peak cyclic-unit fraction (%)", fontsize=11.5)
-    ax2.set_ylabel(f"Deviation, dev = Costa - true ({CMH})", fontsize=11.5)
+    ax2.set_ylabel(f"\u0394PEEP = true \u2212 Costa ({CMH})", fontsize=11.5)
     ax2.set_title("(b)", loc="left", fontsize=12, fontweight="bold"); ax2.grid(alpha=0.25)
     fig.savefig(os.path.join(OUT, "Fig2_core_en.png"))
     plt.close(fig); print("Fig2_core_en.png")
@@ -179,7 +180,7 @@ def fig_states_odcl():
         axO = axes[r, 1]
         axO.plot(P, d["cc"], color=C_COSTA_COLL, lw=2.4, label="Costa collapse %")
         axO.plot(P, d["ch"], color=C_COSTA_HYP, lw=2.4, label="Costa overdist. %")
-        axO.plot(P, d["tc"], color=C_TRUE_COLL, lw=2.2, ls="--", label="True collapse %")
+        axO.plot(P, d["tc"], color=C_TRUE_COLL, lw=2.2, ls="--", label="True collapse % (end-expiratory)")
         axO.plot(P, d["od"], color=C_TRUE_OD, lw=2.2, ls="--", label=f"True overdist. % (TMP{GE}23)")
         lab_t = "True ODCL" if r == 0 else None
         lab_c = "Costa ODCL" if r == 0 else None
@@ -190,7 +191,7 @@ def fig_states_odcl():
         axO.set_title(f"{tag[(r,1)]} {cond} \u2014 ODCL crossing", fontsize=12, pad=5)
         axO.grid(alpha=0.2)
     for ax in (axes[1, 0], axes[1, 1]):
-        ax.set_xlabel(f"PEEP ({CMH})  <- decreasing", fontsize=11)
+        ax.set_xlabel(f"PEEP ({CMH})", fontsize=11)
     # two figure-level legends stacked in the far-right margin (no panel overlap)
     hS, lS = axes[0, 0].get_legend_handles_labels()
     hO, lO = axes[0, 1].get_legend_handles_labels()

@@ -5,9 +5,9 @@ We fix the lung at the representative TR condition of the primary analysis
 (whole-lung recruitable, hysteresis width TOP - TCP = 10, i.e. TOP=12/TCP=2,
 matching the "TR present" panel) and vary each key lung-model parameter one
 at a time around its reference value, holding everything else fixed. For each value we recompute
-the Costa ODCL, the true ODCL, and the deviation dev = Costa - true across
+the Costa ODCL, the true ODCL, and the deviation dev = true - Costa across
 N_SEEDS seeds. The claim under test is that TR drives Costa ODCL BELOW the
-true ODCL (dev < 0) robustly, across plausible variation in:
+true ODCL (dev > 0) robustly, across plausible variation in:
 
   DP        driving pressure (cmH2O)
   max_sp    superimposed-pressure / regional heterogeneity span (cmH2O)
@@ -59,10 +59,10 @@ def measure(**kw):
     cst, tru = [], []
     for seed in range(N_SEEDS):
         lung = make_lung(seed, dp=dp, **kw)
-        _, oc, ot = M.decremental_trial(lung, dp=dp, peep_grid=PEEP_GRID)
+        _, oc, ot = M.decremental_trial(lung, dp=dp, peep_grid=PEEP_GRID, collapse_mode="exp")
         if oc and ot:
             cst.append(oc); tru.append(ot)
-    cst = np.array(cst); tru = np.array(tru); dev = cst - tru
+    cst = np.array(cst); tru = np.array(tru); dev = tru - cst
     return dict(n=int(len(cst)), costa=float(cst.mean()), costa_sd=float(cst.std()),
                 true=float(tru.mean()), true_sd=float(tru.std()),
                 dev=float(dev.mean()), dev_sd=float(dev.std()))

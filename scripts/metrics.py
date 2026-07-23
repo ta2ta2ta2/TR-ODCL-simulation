@@ -41,9 +41,17 @@ def make_lung(seed, aop_mean, aop_sd, acp_mean, acp_sd,
     )
 
 
-def decremental_trial(lung, dp=15.0, peep_grid=None, pip_rec=45.0, n_stab=5):
-    """Decremental PEEP trial. Returns per-PEEP state distribution + compliance,
-    with true_collapse = always_closed and cyclic = air_trap + tidal_recruit."""
+def decremental_trial(lung, dp=15.0, peep_grid=None, pip_rec=45.0, n_stab=5,
+                      collapse_mode="insp"):
+    """Decremental PEEP trial. Returns per-PEEP state distribution + compliance.
+
+    collapse_mode:
+      "insp" (default, original) -> true_collapse = always_closed
+             (units that never ventilate at any point of the breath)
+      "exp"  (end-expiratory collapse) -> true_collapse = always_closed + tidal_recruit
+             (units collapsed at end-expiration; TR units count as injurious collapse).
+             air_trap is NOT included (airway closure with volume retained; ~0 in the
+             airway-free model). overdistension definition is unchanged (TMP >= 23)."""
     if peep_grid is None:
         peep_grid = np.arange(24, 1, -1)
     sp = lung.sp
@@ -65,7 +73,8 @@ def decremental_trial(lung, dp=15.0, peep_grid=None, pip_rec=45.0, n_stab=5):
             tidal_recruit=s['tidal_recruit'],
             always_closed=s['always_closed'],
             overdist=s['overdist'],
-            true_collapse=s['always_closed'],
+            true_collapse=(s['always_closed'] + s['tidal_recruit'])
+                          if collapse_mode == "exp" else s['always_closed'],
             cyclic_reopen=s['air_trap'] + s['tidal_recruit'],
         ))
         _, _, cur_air, cur_alv, _, _ = lung.get_trial_metrics(peep, 0, fa, fv)
